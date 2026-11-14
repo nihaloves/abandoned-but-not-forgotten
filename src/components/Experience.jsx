@@ -1,57 +1,95 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { stories, signals } from "../data/stories";
 import "./Experience.css";
 
-const TARGET = 63; // frequency the visitor must find
+const INTRO = [
+  { text: "Somewhere out there, in the dark, there are machines we built.", ms: 4200 },
+  { text: "We watched. We measured. We drew what we could see.", ms: 4200 },
+  { text: "Then imagining wasn't enough.", ms: 3200 },
+  { text: "So we built machines, and sent them where we could not go.", ms: 4200 },
+  { text: "Mars. The Moon. The edge of the Solar System.", ms: 3800 },
+  { text: "Some of them stopped answering.", ms: 4000 },
+  { text: "title", ms: 5500 },
+];
 
 function useRadio() {
-  const ref = useRef({});
+  const r = useRef({});
   const start = useCallback(() => {
-    if (ref.current.ctx) return;
+    if (r.current.ctx) { r.current.ctx.resume(); return; }
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const master = ctx.createGain();
+    master.connect(ctx.destination);
+    // static
     const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = buf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource();
-    src.buffer = buf; src.loop = true;
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass"; filter.frequency.value = 2000;
-    const gain = ctx.createGain(); gain.gain.value = 0;
-    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
-    src.start();
-    ref.current = { ctx, gain };
+    const noise = ctx.createBufferSource();
+    noise.buffer = buf; noise.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = "bandpass"; bp.frequency.value = 2000;
+    const sg = ctx.createGain(); sg.gain.value = 0;
+    noise.connect(bp); bp.connect(sg); sg.connect(master); noise.start();
+    // low space drone
+    const lp = ctx.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 220;
+    const dg = ctx.createGain(); dg.gain.value = 0;
+    [55, 55.4, 82.5].forEach((f) => {
+      const o = ctx.createOscillator();
+      o.type = "sawtooth"; o.frequency.value = f;
+      o.connect(lp); o.start();
+    });
+    lp.connect(dg); dg.connect(master);
+    dg.gain.setTargetAtTime(0.06, ctx.currentTime, 2);
+    r.current = { ctx, sg, dg };
   }, []);
   const staticLevel = useCallback((v) => {
-    const { ctx, gain } = ref.current;
-    if (ctx) gain.gain.setTargetAtTime(v * 0.2, ctx.currentTime, 0.05);
+    const { ctx, sg } = r.current;
+    if (ctx) sg.gain.setTargetAtTime(v * 0.2, ctx.currentTime, 0.05);
+  }, []);
+  const drone = useCallback((v) => {
+    const { ctx, dg } = r.current;
+    if (ctx) dg.gain.setTargetAtTime(v, ctx.currentTime, 1);
   }, []);
   const ping = useCallback(() => {
-    const { ctx } = ref.current;
+    const { ctx } = r.current;
     if (!ctx) return;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.frequency.value = 880;
     g.gain.setValueAtTime(0.25, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.4);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.6);
     o.connect(g); g.connect(ctx.destination);
-    o.start(); o.stop(ctx.currentTime + 1.4);
+    o.start(); o.stop(ctx.currentTime + 1.6);
   }, []);
-  return { start, staticLevel, ping };
+  return { start, staticLevel, drone, ping };
 }
 
-function Starfield() {
+function Starfield({ speed }) {
   const ref = useRef();
+  const sp = useRef(speed);
+  useEffect(() => { sp.current = speed; }, [speed]);
   useEffect(() => {
-    const c = ref.current, x = c.getContext("2d");
+    const c = ref.current, g = c.getContext("2d");
     const resize = () => { c.width = innerWidth; c.height = innerHeight; };
     resize(); addEventListener("resize", resize);
-    const stars = Array.from({ length: 220 }, () => ({ x: Math.random(), y: Math.random(), z: Math.random() * 0.8 + 0.2 }));
+    const stars = Array.from({ length: 420 }, () => ({
+      x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random(),
+    }));
     let raf;
     const tick = () => {
-      x.clearRect(0, 0, c.width, c.height);
-      stars.forEach((s) => {
-        s.x -= 0.00012 * s.z; if (s.x < 0) s.x = 1;
-        x.globalAlpha = s.z; x.fillStyle = "#efe7d6";
-        x.fillRect(s.x * c.width, s.y * c.height, s.z * 1.8, s.z * 1.8);
-      });
+      g.fillStyle = "rgba(10,16,20,0.35)";
+      g.fillRect(0, 0, c.width, c.height);
+      const cx = c.width / 2, cy = c.height / 2;
+      const f = Math.max(c.width, c.height) * 0.25;
+      for (const s of stars) {
+        s.z -= sp.current;
+        if (s.z <= 0.02) { s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; s.z = 1; }
+        const px = cx + (s.x / s.z) * f, py = cy + (s.y / s.z) * f;
+        const r = Math.max(0.5, (1 - s.z) * 2.4);
+        g.globalAlpha = 1 - s.z * 0.7;
+        g.fillStyle = "#efe7d6";
+        g.fillRect(px, py, r, r);
+      }
+      g.globalAlpha = 1;
       raf = requestAnimationFrame(tick);
     };
     tick();
@@ -65,16 +103,18 @@ function Garble({ text, noise }) {
   useEffect(() => {
     const id = setInterval(() => {
       const g = "▒░#%&*";
-      setOut([...text].map((c) => (c === " " ? c : Math.random() < noise ? g[Math.floor(Math.random() * g.length)] : c)).join(""));
+      setOut([...text].map((c) =>
+        c === " " ? c : Math.random() < noise ? g[Math.floor(Math.random() * g.length)] : c
+      ).join(""));
     }, 80);
     return () => clearInterval(id);
   }, [text, noise]);
   return <>{out}</>;
 }
 
-function Tuner({ radio, onLock }) {
-  const [v, setV] = useState(10);
-  const closeness = Math.max(0, 1 - Math.abs(v - TARGET) / 25);
+function Tuner({ radio, story, onLock }) {
+  const [v, setV] = useState(8);
+  const closeness = Math.max(0, 1 - Math.abs(v - story.target) / 28);
   useEffect(() => { radio.staticLevel(1 - closeness); }, [closeness]);
   useEffect(() => {
     if (closeness < 0.93) return;
@@ -84,8 +124,11 @@ function Tuner({ radio, onLock }) {
   return (
     <div className="xp-center">
       <p className="xp-label">SIGNAL DETECTED · {(88 + v / 10).toFixed(1)} MHz</p>
-      <h2 className="xp-garble"><Garble text="SOMETHING IS STILL TRANSMITTING" noise={1 - closeness} /></h2>
-      <input type="range" min="0" max="100" value={v} onChange={(e) => setV(+e.target.value)} className="xp-tuner" />
+      <h2 className="xp-garble">
+        <Garble text="SOMETHING IS STILL TRANSMITTING" noise={1 - closeness} />
+      </h2>
+      <input type="range" min="0" max="100" value={v}
+        onChange={(e) => setV(+e.target.value)} className="xp-tuner" />
       <p className="xp-hint">Drag to tune the signal</p>
     </div>
   );
@@ -102,7 +145,9 @@ function Transmission({ story, onRewind }) {
     <div className="xp-center">
       <p className="xp-label">SURVIVING EVIDENCE · {story.name.toUpperCase()}</p>
       {story.evidence.slice(0, n).map((l, i) => <p key={i} className="xp-line">{l}</p>)}
-      {n >= story.evidence.length && <button className="xp-btn" onClick={onRewind}>⏪ Rewind the story</button>}
+      {n >= story.evidence.length && (
+        <button className="xp-btn" onClick={onRewind}>⏪ Rewind the story</button>
+      )}
     </div>
   );
 }
@@ -111,103 +156,143 @@ function Flashback({ story, onDone }) {
   const [year, setYear] = useState(story.chapters[0].year);
   useEffect(() => {
     const obs = new IntersectionObserver(
-      (es) => es.forEach((e) => e.isIntersecting && setYear(+e.target.dataset.year)),
+      (es) => es.forEach((e) => e.isIntersecting && e.target.dataset.year && setYear(+e.target.dataset.year)),
       { threshold: 0.6 }
     );
-    document.querySelectorAll(".xp-chapter[data-year]").forEach((el) => obs.observe(el));
+    document.querySelectorAll(".xp-chapter").forEach((el) => obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+  }, [story]);
   return (
     <div className="xp-flash">
       <div className="xp-year">{year}</div>
       {story.chapters.map((c) => (
-        <section
-          key={c.year}
-          data-year={c.year}
-          className={`xp-chapter ${c.image ? "xp-chapter--image" : ""}`}
-        >
-          {c.image && <img className="xp-chapter__image" src={c.image} alt="" />}
-          <div className="xp-chapter__content">
+        <section key={story.id + c.year} data-year={c.year} className="xp-chapter">
+          <div className="xp-bg" style={{ backgroundImage: `url(${c.image})` }} />
+          <div className="xp-inner">
             <p className="xp-label">{c.year}</p>
             <h2>{c.title}</h2>
             <p>{c.text}</p>
           </div>
-          {c.credit && <p className="xp-chapter__credit">{c.credit}</p>}
+          <p className="xp-credit">Image: {c.credit}</p>
         </section>
       ))}
       <section className="xp-chapter">
-        <p className="xp-machine">{story.machineVoice}</p>
-        <button className="xp-btn" onClick={onDone}>Look beyond →</button>
+        <div className="xp-inner">
+          <p className="xp-machine">{story.machineVoice}</p>
+          <p>{story.legacy}</p>
+          <p className="xp-sources">Sources: {story.sources.join(" · ")}</p>
+          <button className="xp-btn" onClick={onDone}>Look beyond →</button>
+        </div>
       </section>
     </div>
   );
 }
 
-function Expand({ onSelectOpportunity }) {
-  const [activeHint, setActiveHint] = useState(null);
-  const dots = [
-    { x: 62, y: 40, name: "Opportunity", live: true },
-    { x: 24, y: 58, name: "Apollo stations" },
-    { x: 80, y: 22, name: "Pioneer 10" },
-    { x: 45, y: 72, name: "NEAR Shoemaker" },
-    { x: 15, y: 25, name: "Kepler" },
-    { x: 70, y: 66, name: "InSight" },
-  ];
+function Expand({ seen, onPick }) {
   return (
     <div className="xp-field">
       <p className="xp-label xp-top">THERE ARE MORE SIGNALS</p>
-      {dots.map((d) => (
-        <button
-          key={d.name}
-          type="button"
-          className={`xp-dot ${d.live ? "" : "dim"} ${activeHint === d.name ? "is-active" : ""}`}
-          style={{ left: d.x + "%", top: d.y + "%" }}
-          aria-label={d.live ? "Opportunity — tune signal" : `${d.name} — more stories coming`}
-          aria-expanded={!d.live && activeHint === d.name}
-          onClick={() => {
-            if (d.live) onSelectOpportunity();
-            else setActiveHint(activeHint === d.name ? null : d.name);
-          }}
-        >
-          <span className="xp-dot__planet" aria-hidden="true" />
-          <em>{d.live ? d.name : "signal faint"}</em>
-          {!d.live && <span className="xp-dot__hint">More stories coming</span>}
-        </button>
-      ))}
+      {signals.map((d) => {
+        const live = d.id && stories[d.id];
+        return (
+          <div key={d.name}
+            className={`xp-dot ${live ? "live" : "dim"} ${seen.includes(d.id) ? "seen" : ""}`}
+            style={{ left: d.x + "%", top: d.y + "%" }}
+            onClick={() => live && onPick(d.id)}>
+            <span />
+            <em>{live ? d.name : "signal faint · more stories coming"}</em>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-export default function Experience({ story }) {
+export default function Experience() {
   const [stage, setStage] = useState("gate");
+  const [card, setCard] = useState(0);
+  const [id, setId] = useState("opportunity");
+  const [seen, setSeen] = useState([]);
   const radio = useRadio();
+  const story = stories[id];
+
+  useEffect(() => { window.scrollTo(0, 0); }, [stage]);
 
   useEffect(() => {
+    if (stage === "intro") {
+      if (card >= INTRO.length) { setStage("drift"); return; }
+      const t = setTimeout(() => setCard(card + 1), INTRO[card].ms);
+      return () => clearTimeout(t);
+    }
     if (stage === "drift") {
-      const t = setTimeout(() => { radio.ping(); setStage("interrupt"); }, 7000);
+      const t = setTimeout(() => { radio.ping(); setStage("interrupt"); }, 3500);
       return () => clearTimeout(t);
     }
     if (stage === "interrupt") {
-      const t = setTimeout(() => setStage("tune"), 2500);
+      const t = setTimeout(() => setStage("tune"), 2800);
       return () => clearTimeout(t);
     }
-  }, [stage]);
+  }, [stage, card]);
+
+  const speed =
+    stage === "intro"
+      ? card >= INTRO.length - 1 ? 0.0006 : 0.0015 + card * 0.0007
+      : stage === "tune" ? 0.0003 : 0.0006;
+
+  const pick = (sid) => { setId(sid); radio.ping(); setStage("interrupt"); };
+  const cinema = ["intro", "drift", "interrupt"].includes(stage);
 
   return (
     <main className={`xp ${stage === "interrupt" ? "glitch" : ""} ${stage === "flashback" ? "rewind" : ""}`}>
-      <Starfield />
+      <Starfield speed={speed} />
+      {cinema && <><div className="xp-bar top" /><div className="xp-bar bottom" /></>}
+      {stage === "intro" && (
+        <button className="xp-skip" onClick={() => setStage("drift")}>Skip intro ↦</button>
+      )}
+
       {stage === "gate" && (
         <div className="xp-center">
-          <p className="xp-label">HEADPHONES RECOMMENDED</p>
-          <button className="xp-btn" onClick={() => { radio.start(); setStage("drift"); }}>Begin</button>
+          <p className="xp-label">A story told through the evidence machines left behind</p>
+          <h1 className="xp-gate-title">Abandoned but Not Forgotten</h1>
+          <button className="xp-btn" onClick={() => { radio.start(); setCard(0); setStage("intro"); }}>
+            Begin · headphones recommended
+          </button>
         </div>
       )}
-      {stage === "drift" && <div className="xp-center"><p className="xp-line">Out here, there is mostly silence.</p></div>}
-      {stage === "interrupt" && <div className="xp-center"><h2 className="xp-alert">UNKNOWN SIGNAL</h2></div>}
-      {stage === "tune" && <Tuner radio={radio} onLock={() => setStage("transmission")} />}
+
+      {stage === "intro" && card < INTRO.length && (
+        <div className="xp-center" key={card}>
+          {INTRO[card].text === "title" ? (
+            <div className="xp-card" style={{ "--d": INTRO[card].ms + "ms" }}>
+              <h1 className="xp-title">Abandoned but Not Forgotten</h1>
+              <p className="xp-label">The stories we left behind</p>
+            </div>
+          ) : (
+            <p className="xp-card xp-cardtext" style={{ "--d": INTRO[card].ms + "ms" }}>
+              {INTRO[card].text}
+            </p>
+          )}
+        </div>
+      )}
+
+      {stage === "drift" && (
+        <div className="xp-center"><p className="xp-line">Out here, there is mostly silence.</p></div>
+      )}
+
+      {stage === "interrupt" && (
+        <div className="xp-center">
+          <h2 className="xp-alert">UNKNOWN SIGNAL</h2>
+          <p className="xp-label">Bearing: {story.origin}</p>
+        </div>
+      )}
+
+      {stage === "tune" && (
+        <Tuner key={id} radio={radio} story={story}
+          onLock={() => { setSeen((s) => [...s, id]); setStage("transmission"); }} />
+      )}
       {stage === "transmission" && <Transmission story={story} onRewind={() => setStage("flashback")} />}
       {stage === "flashback" && <Flashback story={story} onDone={() => setStage("expand")} />}
-      {stage === "expand" && <Expand onSelectOpportunity={() => setStage("tune")} />}
+      {stage === "expand" && <Expand seen={seen} onPick={pick} />}
     </main>
   );
 }
