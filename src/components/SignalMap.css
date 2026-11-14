@@ -1,0 +1,271 @@
+
+.signal-archive {
+  min-height: 100svh;
+  padding: 120px 9vw;
+  background: #111b22;
+  border-top: 1px solid #ffffff18;
+}
+
+.archive-heading {
+  max-width: 650px;
+  margin-bottom: 65px;
+}
+
+.archive-heading h2,
+.archive-location h3,
+.signal-detail h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+}
+
+.archive-heading h2 {
+  font-size: clamp(48px, 7vw, 82px);
+  line-height: 1.1;
+}
+
+.archive-heading > p:last-child,
+.archive-location > p:last-child {
+  max-width: 470px;
+  color: #b6b5ae;
+  line-height: 1.8;
+  margin-top: 18px;
+}
+
+.signal-map {
+  height: 390px;
+  position: relative;
+  overflow: hidden;
+  background: #0c141a;
+  border: 1px solid #ffffff18;
+}
+
+.map-label {
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  color: var(--gold);
+  font-size: 9px;
+  letter-spacing: .2em;
+  z-index: 3;
+}
+
+.map-sun {
+  position: absolute;
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #c5a875;
+  left: 8%;
+  top: 49%;
+  box-shadow: 0 0 30px #c5a87555;
+}
+
+.orbit {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid #ffffff20;
+  border-radius: 50%;
+  height: 230px;
+  width: 230px;
+  pointer-events: none;
+}
+
+.orbit--one {
+  width: 360px;
+  height: 280px;
+}
+
+.orbit--two {
+  width: 590px;
+  height: 340px;
+}
+
+.orbit--three {
+  width: 850px;
+  height: 390px;
+}
+
+.map-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  border: 0;
+  color: #b6b5ae;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+  padding: 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.map-point__planet {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #aaa99f;
+  outline: 1px solid transparent;
+  outline-offset: 7px;
+  transition: .2s ease;
+}
+
+.map-point--moon .map-point__planet {
+  background: #b8b8ad;
+}
+
+.map-point--mars .map-point__planet {
+  background: #bd7654;
+}
+
+.map-point--asteroids .map-point__planet {
+  background: #b49b7c;
+  width: 9px;
+  height: 9px;
+}
+
+.map-point--beyond .map-point__planet {
+  background: #a7b3bd;
+  width: 6px;
+  height: 6px;
+}
+
+.map-point.is-active {
+  color: var(--ivory);
+}
+
+.map-point.is-active .map-point__planet {
+  outline-color: var(--gold);
+  box-shadow: 0 0 18px #c5a87588;
+}
+
+.archive-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 65px;
+  padding: 55px 0;
+  border-bottom: 1px solid #ffffff25;
+}
+
+.archive-location h3,
+.signal-detail h3 {
+  font-size: 44px;
+}
+
+.signal-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.signal-item {
+  padding: 17px 0;
+  border: 0;
+  border-bottom: 1px solid #ffffff25;
+  color: var(--ivory);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+}
+
+.signal-item strong,
+.signal-item small {
+  display: block;
+}
+
+.signal-item strong {
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.signal-item small {
+  color: #aaa99f;
+  margin-top: 6px;
+}
+
+.signal-item.is-selected strong {
+  color: var(--gold);
+}
+
+.signal-detail {
+  max-width: 700px;
+  padding: 55px 0 20px;
+}
+
+.signal-status {
+  color: var(--gold);
+  font-size: 11px;
+  margin-top: 12px;
+}
+
+.signal-question {
+  font-family: var(--serif);
+  font-size: clamp(23px, 3vw, 32px);
+  line-height: 1.5;
+  margin-top: 28px;
+}
+
+.investigate-button {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid #c5a87570;
+  padding: 15px 20px;
+  margin-top: 28px;
+  cursor: pointer;
+}
+
+.investigation-preview {
+  margin-top: 35px;
+  padding: 28px;
+  background: #ffffff08;
+  border-left: 1px solid var(--gold);
+}
+
+.investigation-preview h4 {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 12px;
+}
+
+.investigation-preview p:not(.eyebrow) {
+  color: #b6b5ae;
+  line-height: 1.8;
+}
+
+.investigation-preview span,
+.archive-footnote {
+  display: block;
+  color: #92958f;
+  font-size: 9px;
+  letter-spacing: .12em;
+  margin-top: 22px;
+}
+
+@media (max-width: 650px) {
+  .signal-archive {
+    padding: 85px 7vw;
+  }
+
+  .signal-map {
+    height: 340px;
+  }
+
+  .map-point {
+    font-size: 9px;
+  }
+
+  .orbit--three {
+    width: 680px;
+  }
+
+  .archive-selection {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+}

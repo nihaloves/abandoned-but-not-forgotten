@@ -1,0 +1,115 @@
+.explorer {
+  min-height: 100svh;
+  padding: 5vw 9vw;
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(197, 168, 117, 0.08), transparent 35%),
+    var(--ink);
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 5rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.explorer__header {
+  max-width: 850px;
+  margin-bottom: 5rem;
+}
+
+.explorer__header h1 {
+  font-family: var(--serif);
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.explorer__intro {
+  margin-top: 1.5rem;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.destination-list {
+  border-top: 1px solid rgba(238, 233, 217, 0.18);
+}
+
+.destination {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  gap: 2rem;
+  align-items: center;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid rgba(238, 233, 217, 0.18);
+  color: var(--ivory);
+  text-decoration: none;
+  transition: padding 200ms ease;
+}
+
+.destination:hover {
+  padding-left: 0.8rem;
+}
+
+.destination__number {
+  color: var(--muted-gold);
+  font-family: var(--serif);
+  font-size: 1.5rem;
+}
+
+.destination__main h2 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+}
+
+.destination__main > p:last-child {
+  max-width: 570px;
+  margin-top: 0.8rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.destination__main .eyebrow {
+  margin-bottom: 0.7rem;
+}
+
+.destination__end {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  color: var(--muted-gold);
+  font-size: 0.75rem;
+}
+
+.explorer__footer {
+  padding: 3rem 0;
+}
+
+.explorer__footer a {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+@media (max-width: 650px) {
+  .explorer {
+    padding: 8vw;
+  }
+
+  .back-link {
+    margin-bottom: 4rem;
+  }
+
+  .destination {
+    grid-template-columns: 35px 1fr;
+    gap: 1rem;
+  }
+
+  .destination__end {
+    grid-column: 2;
+    justify-content: space-between;
+  }
+}

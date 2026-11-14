@@ -1,0 +1,276 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=DM+Sans:wght@400;500&display=swap');
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #eee9d9;
+  background: #101820;
+  --ink: #101820;
+  --ivory: #eee9d9;
+  --gold: #c5a875;
+  --serif: 'Bodoni Moda', Georgia, serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  background: var(--ink);
+}
+
+.opening {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 10vh 12vw;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 75% 45%, #29343a 0%, transparent 48%),
+    #101820;
+}
+
+.opening__content {
+  max-width: 850px;
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  margin-bottom: 38px;
+}
+
+.opening h1 {
+  font-family: var(--serif);
+  font-size: clamp(64px, 10vw, 130px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.opening__signature {
+  max-width: 460px;
+  margin-top: 42px;
+  color: #c5c1b5;
+  font-family: var(--serif);
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.6;
+}
+
+.opening__scroll {
+  display: block;
+  margin-top: 90px;
+  color: #aaa99f;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+}
+
+@media (max-width: 600px) {
+  .opening {
+    padding: 8vh 8vw;
+  }
+
+  .opening h1 {
+    font-size: clamp(55px, 13vw, 78px);
+  }
+}
+
+.scroll-link {
+  display: inline-block;
+  margin-top: 75px;
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-decoration: none;
+}
+
+.story-scene {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: 12vh 12vw;
+  position: relative;
+  background: #141f27;
+  border-top: 1px solid #ffffff12;
+}
+
+.story-scene:nth-child(odd) {
+  background: #19242b;
+}
+
+.story-scene__content {
+  max-width: 760px;
+}
+
+.story-scene h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 88px);
+  line-height: 1.12;
+  margin-bottom: 30px;
+}
+
+.scene-text {
+  max-width: 540px;
+  color: #c5c1b5;
+  font-size: 17px;
+  line-height: 1.9;
+}
+
+@media (max-width: 600px) {
+  .story-scene {
+    padding: 10vh 8vw;
+  }
+}
+
+.evidence-scene {
+  min-height: 100svh;
+  background: #0b1116;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10vh 8vw;
+  gap: 42px;
+}
+
+.evidence-scene__image {
+  width: 100%;
+}
+
+.evidence-scene__image img {
+  display: block;
+  width: 100%;
+  max-height: 65vh;
+  object-fit: cover;
+}
+
+.evidence-scene__image > p {
+  margin-top: 12px;
+  color: #aaa99f;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.evidence-scene__content {
+  max-width: 720px;
+}
+
+.evidence-scene h2 {
+  font-family: var(--serif);
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.evidence-scene__content > p:last-child {
+  color: #c5c1b5;
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+
+.solar-scene {
+  min-height: 100svh;
+  padding: 12vh 8vw;
+  background: #101820;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 65px;
+}
+
+.solar-scene__heading h2 {
+  font-family: var(--serif);
+  font-size: clamp(45px, 7vw, 82px);
+  font-weight: 400;
+  line-height: 1.12;
+}
+
+.solar-scene__intro {
+  max-width: 460px;
+  margin-top: 22px;
+  color: #c5c1b5;
+  line-height: 1.8;
+}
+
+.solar-diagram {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.diagram-note {
+  color: var(--gold);
+  font-size: 9px;
+  letter-spacing: .2em;
+  margin-bottom: 20px;
+}
+
+.solar-diagram svg {
+  width: 100%;
+  overflow: visible;
+}
+
+.solar-diagram svg text {
+  fill: #c5c1b5;
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.diagram-labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 25px;
+  color: #aaa99f;
+  font-size: 12px;
+}
+
+.diagram-labels strong {
+  color: var(--ivory);
+  font-weight: 500;
+}
+
+.solar-scene__ending {
+  max-width: 650px;
+  border-top: 1px solid #ffffff25;
+  padding-top: 35px;
+}
+
+.solar-scene__signature {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.5;
+}
+
+.opening-link {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .12em;
+}
+
+@media (max-width: 600px) {
+  .solar-scene {
+    padding: 10vh 7vw;
+    gap: 40px;
+  }
+
+  .diagram-labels {
+    flex-direction: column;
+  }
+}
